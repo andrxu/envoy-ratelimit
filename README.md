@@ -1,4 +1,4 @@
-# Envoy-based Rate Limit Service
+# Envoy Rate Limit Service
 
 This repository demonstrates how the Envoy rate limit service works.
 
