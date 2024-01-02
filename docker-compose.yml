@@ -1,0 +1,62 @@
+version: "3"
+
+services:
+  # rate limit service, with the rate limiting rules
+  ratelimit:
+    image: envoyproxy/ratelimit:master
+    container_name: ratelimit-service
+    command: /bin/ratelimit
+    ports:
+      - 8080:8080 #http
+      - 8081:8081 #grpc
+      - 6070:6070 #debug
+    depends_on:
+      - redis
+    volumes:
+      - ./ratelimit:/data/ratelimit/config
+    environment:
+      - USE_STATSD=false
+      - LOG_LEVEL=debug
+      - REDIS_SOCKET_TYPE=tcp
+      - REDIS_URL=redis:6379
+      - RUNTIME_ROOT=/data
+      - RUNTIME_SUBDIRECTORY=ratelimit
+      - RUNTIME_WATCH_ROOT=false
+
+  # redis that holds rate limit counters 
+  redis:
+    image: redis:alpine
+    expose:
+      - 6379
+    ports:
+      - 6379:6379
+
+  # a proxy that intercepts the traffic and calls the rate limit service
+  envoy-proxy:
+    image: envoyproxy/envoy-dev:latest
+    container_name: envoy-proxy
+    entrypoint: "/usr/local/bin/envoy"
+    depends_on:
+      - httpbin
+    volumes:
+      - ./envoy/envoy.yaml:/etc/envoy/envoy.yaml
+    expose:
+      - 8888 #ratelimit
+      - 8001 #admin
+    ports:
+      - 8888:8888
+      - 8001:8001
+    command:
+      - "--config-path /etc/envoy/envoy.yaml"
+      - "--service-node proxy"
+      - "--service-cluster proxy"
+      - "--concurrency 1"
+
+  # a rate limited service 
+  httpbin:
+    image: kennethreitz/httpbin
+    container_name: httpbin
+    expose:
+      - 80
+    ports:
+      - 80:80
