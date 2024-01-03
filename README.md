@@ -1,6 +1,6 @@
 # Envoy Rate Limit Service
 
-This repository demonstrates how the Envoy rate limit service works.
+This repository demonstrates how the Envoy rate limit service works without including too many details. You may want to refer to https://github.com/envoyproxy/ratelimit for detailed documentation.
 
 ```
                         +-------+                                           
