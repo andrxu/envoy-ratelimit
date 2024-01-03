@@ -11,9 +11,11 @@ This repository demonstrates how the Envoy rate limit service works without incl
                             |                                              
                             |        +---------------------+   +-----------+
                             |        |                     |   |           |
-                  ->        +-->-----+ Rate Limit Service  +->-+   Redis   |
-                             :8080   |                     |   |           |
-                             :8081   +---------------------+   +-----------+
+     grpc client  ->        +-->-----+ Rate Limit Service  +->-+   Redis   |
+                :8081                |                     |   |           |
+                                     +----------+----------+   +-----------+
+                                                ^
+                                             (rules) 
 ```
 
 ## How to run this 
@@ -68,4 +70,10 @@ Due to the [rules](./ratelimit/rules.yaml#L41-L44):
     rate_limit:
       unit: minute
       requests_per_unit: 2
+```
+
+Run go client:
+```
+  cd client
+  make test
 ```
